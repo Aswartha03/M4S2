@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            width: 70%;
+            height: 20vh;
+            margin: auto;
+        }
+        #form>input{
+            width: 30%;
+            height: 5vh;
+            margin: 2px;
+
+        }
+        #form>button{
+            width: 30%;
+            height: 5vh;
+            margin: 2px;
+            background-color: aqua;
+            border: none;
+            border-radius: 5px;
+        }
+        #form>button:hover{
+            background-color: blueviolet;
+            color: rgb(210, 242, 243);
+        }
+    </style>
+</head>
+<body>
+    <h3 style="text-align: center;">User Registration Page</h3>
+    <form id="form">
+        <input type="text" id="name" placeholder="Enter the Name" required>
+        <input type="email" id="email" placeholder="Enter the Email" required>
+        <input type="password" id="password" placeholder="Enter the password" required>
+        <button type="submit">Register</button>
+    </form>
+    <p id="message" ></p>
+</body>
+</html>
+<script>
+    // let url="https://your-backend-api.com/register"
+    document.getElementById("form").addEventListener("submit",register)
+    async function register(event){
+        event.preventDefault()
+        let name = document.getElementById("name").value
+        let email = document.getElementById("email").value
+        let password = document.getElementById("password").value
+        let message = document.getElementById("message")
+        message.innerText=""
+        try {
+            let res = await fetch("https://your-backend-api.com/register",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({Name:name,Email:email,Password:password})
+            })
+            res = await res.json()
+            message.innerText="Successfully regestered"
+        } catch (error) {
+            console.log("Failed to fetch")
+            message.innerHTML="Error ocuurs"
+        } 
+        
+    }
+
+</script>
