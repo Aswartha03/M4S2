@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            width: 60%;
+            margin: auto;
+        }
+        #container{
+            display: inline;
+            flex-wrap: wrap;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h4 style="text-align: center;">User Data</h4>
+        <button onclick="fetchData()">Click to show the User Data</button>
+        <table id="table" border="1px" style="margin: 20px;width: 30%;">
+            <thead>
+                <tr style="margin: 40px;">
+                    <th >Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+
+        </table>
+    </div>
+    
+</body>
+</html>
+<script>
+    let url = "https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json"
+    async function fetchData() {
+        let res = await fetch("https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json",{
+            method:"GET"
+        })
+        let data = await res.json()
+        // console.log(data)
+        data = Object.entries(data)
+        // console.log(data)
+        data = data.map(([id,user])=>({id,...user}))
+        displayData(data)
+    }
+    function displayData(data){ 
+        let mainTable = document.getElementById("table")
+        mainTable.innerText=""
+        
+        data.forEach((user)=>{
+            let tableBody = document.createElement("tr")
+            let name = document.createElement("td")
+            let email = document.createElement("td")
+            name.innerText = user.name
+            email.innerText = user.email
+            tableBody.append(name,email)
+            mainTable.appendChild(tableBody)
+        })
+
+    }
+    // fetch()
+</script>
