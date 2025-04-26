@@ -36,15 +36,19 @@
 <script>
     let url = "https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json"
     async function fetchData() {
-        let res = await fetch("https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json",{
-            method:"GET"
-        })
-        let data = await res.json()
-        // console.log(data)
-        data = Object.entries(data)
-        // console.log(data)
-        data = data.map(([id,user])=>({id,...user}))
-        displayData(data)
+        try {
+            let res = await fetch("https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json",{
+                method:"GET"
+            })
+            let data = await res.json()
+            // console.log(data)
+            data = Object.entries(data)
+            // console.log(data)
+            data = data.map(([id,user])=>({id,...user}))
+            displayData(data)
+        } catch (error) {
+            alert("Failed to Fetch the Data")
+        } 
     }
     function displayData(data){ 
         let mainTable = document.getElementById("table")
