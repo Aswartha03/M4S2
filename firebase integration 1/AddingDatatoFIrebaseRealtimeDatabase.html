@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adding Data to Firebase Realtime Database</title>
+    <style>
+        body{
+            width: 50%;
+            height: 40vh;
+            
+            margin: auto;
+        }
+        #form>input{
+            width: 300px;
+            height: 30px;
+            margin: 10px;
+        }
+        button{
+            width: 200px;
+            height: 30px;
+            margin: 10px;
+            background-color: rgb(145, 216, 216);
+        }
+        button:hover{
+            background-color: rgb(147, 147, 247);
+            color: white;
+            border-radius: 5px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h4>Adding Data to Firebase Realtime Database</h4>
+   
+    <form id="form"  >
+        <input type="text" id="name" placeholder="Enter the Name" required>
+        <input type="email" id="email" placeholder="Enter the Email" required>
+        <!-- <input type="submit" placeholder="submit"> -->
+    </form>
+    <button  onclick="addData()">Submit</button>
+    <p id="message"></p>
+</body>
+</html>
+<script>
+   
+     async function addData(){
+        let messageBox = document.getElementById("message")
+        messageBox.innerText=""
+        try {
+            let Name = document.getElementById("name").value
+            let Email = document.getElementById("email").value
+            console.log(name,email)
+            let res = await fetch("https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json",{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify({name:Name,email:Email})
+            })
+            messageBox.innerText="Successfully Added New Data"
+            console.log("Success")
+        } 
+        catch (error) {
+            messageBox.innerText="Error occured"
+            console.log("error")
+        }
+        
+    }
+</script>
