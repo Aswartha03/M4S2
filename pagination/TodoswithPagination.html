@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todos with Pagination</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        #container{
+            display: grid;
+            grid-template-columns: repeat(3,300px);
+            gap: 10px;
+            justify-content: center;
+            /* background-color: red; */
+            
+        }
+        #container div{
+            margin: 3px;
+        }
+        button{
+            width: 20%;
+            height: 5vh;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h4>Todos with Pagination</h4>
+    <button onclick="displayData()">Fetch Data</button>
+    <div id="container"></div>
+</body>
+</html>
+<script>
+    let url = "https://jsonplaceholder.typicode.com/todos"
+    async function fetchData(){
+        let res = await fetch(url)
+        let data =  await res.json()
+        return data
+    }
+    async function displayData(){
+        let dataList = await fetchData()
+        console.log(dataList)
+        let container = document.getElementById("container")
+        container.innerText=""
+        dataList.forEach((user)=>{
+            let div = document.createElement("div")
+            let userId = document.createElement("p")
+            let id = document.createElement("p")
+            let title = document.createElement("p")
+            let completed= document.createElement("p")
+            userId.innerText=`UserID : ${user.userId}`
+            id.innerText=`Id : ${user.id}`
+            title.innerText=` Title : ${user.title}`
+            completed.innerText = `Completed : ${user.completed}`
+            div.append(userId,id,title,completed)
+            container.appendChild(div)
+        })
+    }
+</script>
