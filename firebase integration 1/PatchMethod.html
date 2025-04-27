@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Updating User Data in Firebase</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        #table{
+            width: 50%;
+            margin: auto;
+        }
+        #submit{
+            width: 100px;
+            margin: 5px;
+            background-color: rgb(81, 228, 154);
+            border-width:2px ;
+            color: rgb(14, 1, 1);
+        }
+        #submit:hover{
+            background-color: aqua;
+            border-radius: 5px;
+            border: none;
+        }
+        input{
+            height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h4>Updating User Data in Firebase</h4>
+    <form action="" id="form">
+        <input type="text" id="id" readonly>
+        <input type="text" id="name" placeholder="Enter The Name">
+        <input type="email" id="email" placeholder="Enter the Email">
+    </form>
+    <button id="submit" onclick="updateData()">Edit</button>
+    <table id="table" border="2px">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+    </table>
+</body>
+</html>
+<script>
+let url ="https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users.json"
+async function fetchData(){
+    let res = await fetch(url)
+    let data = await res.json()
+    
+    data = Object.entries(data).map(([id,user])=>({id,...user}))
+    return data
+    // console.log(data)
+}
+
+async function displayData(){
+    let users = await fetchData()
+    console.log(users)
+    let mainTable  = document.getElementById('table')
+    mainTable.innerHTML=""
+    users.forEach((user)=>{
+        let tableRow = document.createElement("tr")
+        let name = document.createElement("td")
+        let email = document.createElement("td")
+        let action = document.createElement("td")
+        name.innerText= user.name
+        email.innerText = user.email
+        let button = document.createElement("button")
+        button.className="edit-btn"
+        button.innerText="Edit-User"
+        button.onclick=()=>editUser(user.id,user.name,user.email)
+        action.appendChild(button)
+        tableRow.append(name,email,action)
+        mainTable.appendChild(tableRow)
+    })
+}
+function editUser(id,name,email){
+    document.getElementById("id").value=id
+    document.getElementById("name").value = name
+    document.getElementById("email").value=email
+}
+async function updateData(){
+    let userId = document.getElementById("id").value
+    let Name = document.getElementById("name").value
+    let Email = document.getElementById("email").value 
+    let obj = {name:Name,email:Email}
+    if(!userId){
+        alert("Please select a user to update!")
+        document.getElementById("name").value = ""
+        document.getElementById("email").value = ""
+        return 
+    }
+    else{
+    let urlMain=`https://user-database-75be2-default-rtdb.asia-southeast1.firebasedatabase.app/users/${userId}.json`
+    await fetch(urlMain,{
+        method:"PATCH",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify(obj)
+    })
+   }
+    document.getElementById("id").value =""
+    document.getElementById("name").value =""
+    document.getElementById("email").value =""
+    displayData()
+}
+displayData()
+</script>

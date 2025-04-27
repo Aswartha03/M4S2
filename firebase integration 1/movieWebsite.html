@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Website</title>
+    <style>
+        body{
+            text-align: center;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        input,button,select{
+            margin: 5px;
+            padding: 8px;
+        }
+        #Container{
+            display: grid;
+            grid-template-columns: repeat(4,200px);
+            gap: 15px;
+            justify-content: center;
+        } 
+        .movie-card{
+            background-color: rgb(222, 223, 217);
+            padding: 10px;
+        }
+        .movie-card img{
+            width: 100px;
+            border: none;
+        }
+        .movie-card button:nth-of-type(1){
+            background-color: rgb(125, 212, 247);
+            border: none;
+            color: rgb(241, 233, 233);
+        }
+        .movie-card button:nth-of-type(2){
+            background-color: rgb(241, 151, 158);
+            border: none;
+            color: rgb(241, 233, 233);
+        }
+        .movie-card button:nth-of-type(1):hover{
+            background-color: rgb(78, 134, 240);
+            border-radius: 10px;
+        }
+        .movie-card button:nth-of-type(2):hover{
+            background-color: rgb(245, 63, 190);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h2 style="color: orangered;"> Movie WebSite</h2>
+    </header>
+    
+    <input type="text" id="movieId" readonly>
+    <input type="text" id="title" placeholder="Enter the Movie Title">
+    <input type="number" id="year" placeholder="Year">
+    <input type="Gener"  id="Gener" placeholder="Gener">
+    <input type="text" id="image" placeholder="Image Url">
+    <button onclick="addOrUpdateMovie()">Save Movie</button>
+
+    <h3 style="color: blue;">Filter and Sort Movies</h3>
+    <!-- filtering -->
+     <input type="number" id="filterYear" placeholder="Filter Year">
+     <select  id="filterGenre">
+        <option value="">All</option>
+        <option value="Action">Action</option>
+        <option value="Horror">Horror</option>
+        <option value="Crime">Crime</option>
+        <option value="Drama">Drama</option>
+        <option value="SCI-FI">Sci-Fi</option>
+     </select>
+     <button onclick="applyFilterandSorting()">Apply Filter</button>
+     <!-- Sorting -->
+      <select  id="sortBy">
+        <option value="year-asc">Ascending</option>
+        <option value="year-desc">Descending</option>
+      </select>
+      <button onclick="applyFilterandSorting()">Sort Movies</button>
+
+    <h3 style="color: rgb(221, 24, 228);">Movie List</h3>
+    <div id="Container"></div>
+    
+</body>
+</html>
+<script>
+    // adding or updating movie based on id
+    async function addOrUpdateMovie(){
+        let movieid = document.getElementById('movieId').value 
+        let movie = {
+            title : document.getElementById("title").value,
+            Gener : document.getElementById("Gener").value,
+            year : document.getElementById("year").value,
+            image : document.getElementById("image").value
+        }
+        // movieid is present => patch request  ele  => post request 
+        if(movieid){
+            await fetch(`https://movieproject-5f189-default-rtdb.asia-southeast1.firebasedatabase.app/movies/${movieid}.json`,{
+                method:"PATCH",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(movie)
+            })
+            document.getElementById("movieId").value=""
+        }
+        else{
+            await fetch(`https://movieproject-5f189-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json`,{
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(movie)
+            })
+        }
+        // clearing after performing
+        document.getElementById("year").value=""
+        document.getElementById("title").value=""
+        document.getElementById("Gener").value=""
+        document.getElementById("image").value=""
+        // document.getElementById("movieId").value
+         
+        applyFilterandSorting()
+    }
+    // applying filter and sorting
+    async function applyFilterandSorting(){
+        let movies =await fetchMovies()
+        let selectedYear = document.getElementById("filterYear").value
+        let selectedGener = document.getElementById("filterGenre").value 
+        let sortBy = document.getElementById("sortBy").value
+        // filtering
+        let filteredMovies = movies.filter((movie)=>{
+            return(
+                (selectedYear=="" || selectedYear==movie.year) && 
+                (selectedGener=="" || selectedGener==movie.Gener)
+            )
+        })
+        filteredMovies.sort((a,b)=>{
+            if(sortBy=="year-asc") return a.year-b.year
+            if(sortBy=="year-desc") return b.year-a.year
+        })
+        displayMovies(filteredMovies)
+    }
+    async function fetchMovies(){
+        let res = await fetch("https://movieproject-5f189-default-rtdb.asia-southeast1.firebasedatabase.app/movies.json",{
+            method:"GET"
+        })
+        let data = await res.json()
+        if (!data) return [] // error Handling
+        let moviesArray = Object.entries(data) 
+        moviesArray = moviesArray.map(([id,movie])=>({id,...movie}))
+        return moviesArray
+    }  
+    // displaying tasks
+    async function displayMovies(movies){
+        // let movies = await fetchMovies()
+        let movieList = document.getElementById("Container")
+        movieList.innerHTML=""
+
+        if(movies.length==0){
+            movieList.innerHTML="<p>Failed to fetch the Movies</p>"
+            return 
+        }
+        movies.forEach((movie)=>{
+            let movieCard = document.createElement("div")
+            movieCard.className="movie-card"
+            movieCard.innerHTML=`
+                <img src="${movie.image}" alt="${movie.title}">
+                <h4>${movie.title} (${movie.year})</h4>
+                <p>${movie.Gener}</p>
+                <button class="edit-btn" onclick="editMovie('${movie.id}',${movie.year},'${movie.title}','${movie.Gener}','${movie.image}')">Edit Movie</button>
+                <button class="delete-btn" onclick="deleteMovie('${movie.id}')">Delete</button>
+            `
+            movieList.appendChild(movieCard)   
+        })
+    }
+    // deleting task
+    async function deleteMovie(movieId){
+        await fetch(`https://movieproject-5f189-default-rtdb.asia-southeast1.firebasedatabase.app/movies/${movieId}.json`,{
+            method:"DELETE" 
+        })
+        applyFilterandSorting() 
+    } 
+    // edit Movie 
+    function editMovie(id,year,title,gener,image){
+        document.getElementById('title').value=title
+        document.getElementById('Gener').value=gener
+        document.getElementById('image').value=image
+        document.getElementById('movieId').value=id
+        document.getElementById('year').value=year
+    }
+    
+    applyFilterandSorting()
+</script>
