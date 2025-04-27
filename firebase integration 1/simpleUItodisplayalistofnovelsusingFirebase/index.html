@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>simple UI to display a list of novels using Firebase.</title>
+    <style>
+        body{
+           text-align: center;
+        }
+        #container{
+            display: grid;
+            grid-template-columns: repeat(2,300px);
+            gap: 10px;
+            justify-content: center;
+        }
+        #container div{
+            justify-content: center;
+            background-color: rgb(240, 232, 198);
+            margin: 10px;
+        }
+        #container div p{
+            text-align: center;
+            /* font-family: 'Courier New', Courier, monospace; */
+        }
+        button{
+            width: 20%;
+            height: 5vh;
+            background-color: rgb(43, 43, 238);
+            color: white;
+            border: none;
+        }
+        button:hover{
+            background-color: aqua;
+            border-radius: 5px;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <h4>Simple UI to display a list of novels using Firebase</h4>
+    <button id="fetch-btn" onclick="displayData()">Fetch Novels</button>
+    <div id="container"></div>
+</body>
+</html>
+<script>
+let url ="https://ui-to-display-a-list-of-novels-default-rtdb.asia-southeast1.firebasedatabase.app/.json"
+ async function fetchData(){
+    let res = await fetch(url)
+    let data = await res.json()
+    return data
+ }
+ async function displayData(){
+    let Novels = await fetchData()
+    let container = document.getElementById("container")
+    container.innerHTML=""
+    Novels.forEach((novel)=>{
+        let novelDiv = document.createElement("div")
+        let author = document.createElement("p") 
+        let genre = document.createElement("p") 
+        let price = document.createElement("p") 
+        let release_year = document.createElement("p") 
+        let title = document.createElement("p") 
+        author.innerText=`Author : ${novel.author}`
+        genre.innerText=`Genre : ${novel.genre}`
+        price.innerText=`Price: ${novel.price}`
+        release_year.innerText=`Release Year : ${novel.release_year}`
+        title.innerText=`Title : ${novel.title}`
+        novelDiv.append(author,genre,price,release_year,title)
+        container.appendChild(novelDiv)
+    })
+ }
+ 
+
+
+
+</script>
