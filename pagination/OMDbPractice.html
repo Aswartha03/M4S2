@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+            text-align: center;
+        }
+        #container{
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(3,200px);
+            
+            justify-content: center;
+            margin: 10px;
+            
+        }
+        #container div{
+            background-color: rgb(223, 212, 198);
+        }
+        #container img{
+            width: 100%;
+            height: 40vh;
+        } 
+        input,button{
+            width: 20%;
+            height: 3vh;
+        }
+        button{
+            background-color: aqua;
+            width: 15%;
+            height: 4vh;
+        }
+        button:hover{
+            background-color: rgb(79, 233, 79);
+            border: none;
+            border-radius: 5px;
+
+        }
+        
+    </style>
+</head>
+<body>
+    <input type=" text" id="searchInput" placeholder="Enter movie name">
+    <button onclick="searchMovies()">Search</button>
+    <div id="container"></div>
+    
+    <button onclick="prevPage()">Prev Page</button>
+    <button onclick="nextPage()">Next Page</button>
+</body>
+</html>
+<script>
+    let key = '70484064'
+    let page=1
+    async function searchMovies(page){
+        let query = document.getElementById("searchInput").value
+        if(!query) alert("Enter the movie")
+        let moviesData=[]
+        let res = await fetch(`http://www.omdbapi.com/?apikey=${key}&s=${query}&page=${page}`)
+        let data = await res.json()
+
+        console.log(data)
+        console.log(data.Search)
+        
+        if(data.Search){
+            moviesData = data.Search
+            displayMovies(moviesData)
+        }else{
+            container.innerHTML="<p>No Results Found</p>"
+        }
+    }
+    function displayMovies(Movies){
+        let container = document.getElementById("container") 
+        container.innerHTML=""
+        Movies.forEach((movie)=>{
+                let movieCard= document.createElement("div")
+                movieCard.innerHTML  = `
+                    <img src="${movie.Poster}" alt="${movie.Title}">
+                    <h3>${movie.Title} (${movie.Title})</h3>
+                    <p>${movie.Type}</p>
+                    <p>${movie.Year}</p>
+                    <p>${movie.imdbID}</p>
+                `
+                container.appendChild(movieCard)
+            })
+    }
+    function prevPage(){
+        page-=1
+        searchMovies(page)
+    }
+    function nextPage(){
+        page+=1 
+        searchMovies(page)
+    }
+</script>  
