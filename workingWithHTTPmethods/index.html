@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Collaborative Study Notes Web App</title>
+    <style>
+        body{
+            text-align: center;
+            margin: auto;
+        }
+        header{
+            background-color: aquamarine;
+            height: 8vh;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+
+        }
+        header nav{
+            /* display: flex; */
+            justify-content: center;
+            justify-content: space-around;
+            /* margin: 10px; */
+            align-content: center;
+            gap:20px;
+        }
+        input,button{
+            width: 200px;
+            height: 5vh;
+            margin: 2px;
+        }
+        select{
+            width:60px;
+            height: 5vh;
+        }
+        textarea{
+            height: 5vh;
+            margin-top:2px;
+        }
+        footer{
+            background-color: rgb(226, 68, 68);
+            height: 30px;
+            margin: 10px;
+            text-align: center;
+            align-content: center;
+            /* position: fixed; */
+            
+            /* bottom: 0; */
+        }
+        #container{
+            display: grid;
+            grid-template-columns: repeat(2,300px);
+            gap: 15px;
+            justify-content: center;
+        }
+        #container div{
+           height: auto;
+            background-color: rgb(196, 196, 216);
+        }
+        #container img{
+            margin: 10px;
+        }
+        #container div>button:nth-of-type(1){
+            background-color: blue;
+            border: none;
+            width: 30%;
+            padding: 5px;
+        }
+        #container div>button:nth-of-type(2){
+            background-color: rgb(255, 0, 0);
+            border: none;
+            width: 30%;
+            margin: 5px;
+            
+        }
+        #container div>button:nth-of-type(1):hover{
+            background-color: rgb(29, 206, 118);
+            border-radius: 5px;
+        }
+        #container div>button:nth-of-type(2):hover{
+            background-color: rgb(204, 112, 6);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav >
+            <a href="#home">Home</a>
+            <a href="#Notes">Create Notes</a>
+            <a href="#view">View Notes</a>
+            <a href="#settings">Settings</a>
+        </nav>
+    </header>
+    <h4>Welcome to the Collaborative Study Notes App!</h4>
+    <!-- notes creation form -->
+     
+    <h4>Create New Study Notes</h4>
+    <form action="">
+        <input type="text" id="id" readonly>
+        <input type="text" id="title" placeholder="Enter the title" required>
+        <textarea  id="description" placeholder="Enter the Description" required></textarea>
+        <select  id="tag">
+            <option value="important">Important</option>
+            <option value="review">Review</option>
+            <option value="to-do">To Do</option>
+        </select>
+        <select id="priority">
+            <option value="high">High</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+        </select>
+        <input type="text" id="image" placeholder="Enter the image address">
+    </form>
+    <button id="submit-btn" onclick="uploadData()" style="margin: 5px;">Submit</button>
+    <p id="message"></p>
+    <div id="container"></div>
+    
+
+
+    <footer>
+        <a href="#concact">Contact Information</a>
+
+    </footer>
+</body>
+</html>
+<script >
+    let url = "https://collaborative-study-notes-web-default-rtdb.asia-southeast1.firebasedatabase.app/.json"
+
+    async function uploadData(){
+    let message = document.getElementById("message")
+    message.innerHTML=""
+    // console.log(3)
+    let title = document.getElementById("title").value
+    let description = document.getElementById("description").value
+    let image = document.getElementById("image").value
+    if(!title || !description || !image){
+        alert("Enter the required values")
+        return 
+    }  
+    let noteBook ={
+        title: document.getElementById("title").value,
+        Description:document.getElementById("description").value,
+        tag :document.getElementById("tag").value,
+        priority:document.getElementById("priority").value,
+        image: document.getElementById("image").value
+    }
+    console.log(noteBook)
+    try {
+        let url = "https://collaborative-study-notes-web-default-rtdb.asia-southeast1.firebasedatabase.app/.json"
+        await fetch(url,{
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(noteBook)
+        })
+        message.innerHTML="Your note has been successfully saved!"
+        document.getElementById("title").value=""
+        document.getElementById("image").value=""
+        document.getElementById("description").value=""
+        document.getElementById("tag").value=""
+        document.getElementById("priority").value=""
+        displayData()
+    } catch (error) {
+        message.innerHTML="Failed to save"
+    } 
+}
+async function displayData(){
+    let res = await fetch("https://collaborative-study-notes-web-default-rtdb.asia-southeast1.firebasedatabase.app/.json")
+    let data = await res.json()
+    console.log(data)
+    bookList= Object.entries(data).map(([id,book])=>({id,...book}))
+    if(bookList.length==0){
+        alert("There is no books to display")
+        return 
+    }// error handling
+    let container = document.getElementById("container")
+    container.innerHTML=""
+    bookList.forEach((book)=>{
+        let div = document.createElement("div")
+        div.innerHTML = `
+        <img src="${book.image}" alt="${book.title}">
+        <h5>${book.title}</h5>
+        <p>${book.Description}</p>
+        <p>${book.priority}</p>
+        <p>${book.tag}</p>
+        <button id="btn-edit" onclick="editBook('${book.title}','${book.id}','${book.Description}','${book.priority}','${book.tag}','${book.image}')">Edit</button>
+        <button id="btn-dlt" onclick="deleteBook('${book.id}')">Delete</button>
+        `
+        container.append(div)
+    })
+}
+ async function deleteBook(id){
+    await fetch(`https://collaborative-study-notes-web-default-rtdb.asia-southeast1.firebasedatabase.app/${id}.json`,{
+        method:"DELETE"
+    })
+    displayData()
+}
+async function editBook(title,id,des,pri,tag,image){
+    document.getElementById("title").value = title
+    document.getElementById("description").value = des 
+    document.getElementById("tag").value = tag
+    document.getElementById("priority").value = pri
+    document.getElementById("image").value = image
+    document.getElementById("id").value = id
+    
+    uploadData()
+}
+displayData()
+</script>
